@@ -1,0 +1,38 @@
+roles:
+  watcher:
+    next: [procurement]
+    identity: AGENT_WATCHER_KEY
+    clearance:
+      tools: [check_stock]
+      read: [inventory]
+  procurement:
+    next: [legal]
+    identity: AGENT_PROCUREMENT_KEY
+    clearance:
+      tools: [search_vendors, select_vendor]
+      read: [request]
+  legal:
+    next: [finance]
+    identity: AGENT_LEGAL_KEY
+    clearance:
+      tools: [read_contract, check_clauses]
+      read: [request, vendor]
+  finance:
+    next: [compliance]
+    identity: AGENT_FINANCE_KEY
+    clearance:
+      tools: [read_budget, check_quote]
+      read: [request, vendor, quote]
+  compliance:
+    next: [done]
+    identity: AGENT_COMPLIANCE_KEY
+    clearance:
+      tools: [check_sanctions]
+      read: [request, vendor]
+
+guardrail:
+  screens: [injection, pii, role_policy]
+  policy:
+    legal: [vendor_details, contract_terms, internal_notes]
+    finance: [vendor_details, budget_figures, internal_notes]
+    compliance: [vendor_details, sanctions_data, internal_notes]

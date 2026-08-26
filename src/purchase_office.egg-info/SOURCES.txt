@@ -1,0 +1,11 @@
+pyproject.toml
+src/purchase_office/__init__.py
+src/purchase_office/config.py
+src/purchase_office/orchestrator.py
+src/purchase_office/state.py
+src/purchase_office.egg-info/PKG-INFO
+src/purchase_office.egg-info/SOURCES.txt
+src/purchase_office.egg-info/dependency_links.txt
+src/purchase_office.egg-info/requires.txt
+src/purchase_office.egg-info/top_level.txt
+tests/test_registry.py

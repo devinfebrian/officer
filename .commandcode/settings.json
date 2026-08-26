@@ -1,0 +1,27 @@
+{
+  "permissions": {
+    "allow": [
+      "Shell(git status --short && echo \"---\" && git log --oneline -5 2>nul)",
+      "Shell(python --version 2>&1; echo \"---\"; pip --version 2>&1)",
+      "Shell(pip:*)",
+      "Shell(findstr:*)",
+      "Shell(python -c \"import langgraph; print('langgraph', langgraph.__version__)\" 2>&1; python -c \"import langgraph.checkpoint.sqlite; print('checkpoint-sqlite ok')\" 2>&1; python -c \"import pytest; print('pytest', pytest.__version__)\" 2>&1)",
+      "Shell(python -c \"import langgraph; from langgraph.graph import StateGraph, START, END; from pydantic import BaseModel; print('langgraph', langgraph.__version__); print('StateGraph', StateGraph)\" 2>&1)",
+      "Shell(python -c \"from langgraph.graph import StateGraph, START, END; import inspect; print(inspect.signature(StateGraph.__init__)); print('---'); print([m for m in dir(StateGraph) if not m.startswith('_')])\" 2>&1)",
+      "Shell(python -c \"from langgraph.graph import StateGraph, START, END; import inspect; print(inspect.signature(StateGraph.compile))\" 2>&1)",
+      "Shell(python -c \"from langgraph.graph import StateGraph, START, END; import inspect; print(inspect.signature(StateGraph.add_node)); print(inspect.signature(StateGraph.add_edge)); print(inspect.signature(StateGraph.add_conditional_edges))\" 2>&1)",
+      "Shell(python -c \"from pydantic import BaseModel, Field; from langgraph.graph import StateGraph, START, END; from typing import Any class S(BaseModel): x: int = 0 status: str = 'RAISED' def __init__(self, **d): super().__init__(**d) g = StateGraph(S) def n1(s): return {'x': s.x + 1} def n2(s): return {'status': 'FILED'} g.add_node('n1', n1); g.add_node('n2', n2) g.add_edge(START, 'n1'); g.add_edge('n1', 'n2'); g.add_edge('n2', END) c = g.compile() r = c.invoke({'x': 10}) print(type(r)); print(r)\" 2>&1)",
+      "Shell(python -c \"from pydantic import BaseModel; from langgraph.graph import StateGraph, START, END class S(BaseModel): x: int = 0 status: str = 'RAISED' def n1(s): return {'x': s.x + 1} def n2(s): return {'status': 'FILED'} g = StateGraph(S) g.add_node('n1', n1); g.add_node('n2', n2) g.add_edge(START, 'n1'); g.add_edge('n1', 'n2'); g.add_edge('n2', END) c = g.compile() r = c.invoke({'x': 10}) print('TYPE', type(r)) print('VALUE', r)\" 2>&1)",
+      "Shell(python -c \"import sys; from pydantic import BaseModel; from langgraph.graph import StateGraph, START, END class S(BaseModel): x: int = 0 status: str = 'RAISED' def n1(s): return {'x': s.x + 1} def n2(s): return {'status': 'FILED'} g = StateGraph(S) g.add_node('n1', n1); g.add_node('n2', n2) g.add_edge(START, 'n1'); g.add_edge('n1', 'n2'); g.add_edge('n2', END) c = g.compile() r = c.invoke({'x': 10}) sys.stdout.write('TYPE ' + str(type(r)) + chr(10)) sys.stdout.write('VALUE ' + str(r) + chr(10)) sys.stdout.flush()\" 2>&1)",
+      "Shell(python -c import sys; from pydantic import BaseModel; from langgraph.graph import StateGraph, START, END class S(BaseModel): x: int = 0 status: str = 'RAISED' def n1(s): return {'x': s.x + 1} def n2(s): return {'status': 'FILED'} g = StateGraph(S) g.add_node('n1', n1); g.add_node('n2', n2) g.add_edge(START, 'n1'); g.add_edge('n1', 'n2'); g.add_edge('n2', END) c = g.compile() r = c.invoke({'x': 10}) sys.stderr.write('TYPE=' + str(type(r)) + ' VALUE=' + str(r) + chr(10)) 2 >& 1)",
+      "Shell(python -c \"from pydantic import BaseModel; from langgraph.graph import StateGraph, START, END class S(BaseModel): x: int = 0 status: str = 'RAISED' def n1(s): return {'x': s.x + 1} def n2(s): return {'status': 'FILED'} g = StateGraph(S) g.add_node('n1', n1); g.add_node('n2', n2) g.add_edge(START, 'n1'); g.add_edge('n1', 'n2'); g.add_edge('n2', END) c = g.compile() r = c.invoke({'x': 10}) open('C:/Users/USER/AppData/Local/Temp/commandcode/C--Users-USER-Portofolio-agent/97b899b3-574d-4357-a166-ae6c0d7bfce5/scratchpad/probe.txt','w').write('TYPE='+str(type(r))+' VALUE='+str(r))\" 2>&1)",
+      "Shell(python \"C:\\Users\\USER\\AppData\\Local\\Temp\\commandcode\\C--Users-USER-Portofolio-agent\\97b899b3-574d-4357-a166-ae6c0d7bfce5\\scratchpad\\probe.py\" 2>&1)",
+      "Shell(python -c from langgraph.graph import StateGraph, START, END import inspect from langgraph.graph.state import CompiledStateGraph print([m for m in dir(CompiledStateGraph) if not m.startswith('_')]) 2 >& 1)",
+      "Shell(python \"C:\\Users\\USER\\AppData\\Local\\Temp\\commandcode\\C--Users-USER-Portofolio-agent\\97b899b3-574d-4357-a166-ae6c0d7bfce5\\scratchpad\\probe2.py\" 2>&1)",
+      "Shell(python \"C:\\Users\\USER\\AppData\\Local\\Temp\\commandcode\\C--Users-USER-Portofolio-agent\\97b899b3-574d-4357-a166-ae6c0d7bfce5\\scratchpad\\probe3.py\" 2>&1)",
+      "Shell(python -m pytest tests/test_registry.py -q 2 >& 1)"
+    ],
+    "deny": [],
+    "defaultMode": "default"
+  }
+}
