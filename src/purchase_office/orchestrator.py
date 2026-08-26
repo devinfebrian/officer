@@ -4,11 +4,12 @@ from typing import Any, Callable
 
 from langgraph.graph import END, START, StateGraph
 
+from . import tools as tool_functions
 from .config import Registry
+from .guardrail.guardrail import Guardrail
 from .llm import LLMClient
 from .roles import Compliance, Finance, Legal, Procurement, Watcher
 from .state import CaseFile
-from . import tools as tool_functions
 
 ROLE_CLASSES = {
     "watcher": Watcher,
@@ -24,11 +25,23 @@ def _terminal(state: CaseFile):
     return {"status": "REJECTED" if rejected else "FILED"}
 
 
-def _make_role_node(role):
+def _make_role_node(role, guardrail: Guardrail, recipient: str):
     def node(state: CaseFile):
-        return role.run(state)
+        update = role.run(state)
+        message = role.message_for(state, update)
+        ok, writeup = guardrail.check(role.name, recipient, message)
+        if not ok:
+            return {
+                "status": "QUARANTINED",
+                "writeups": [*state.writeups, writeup],
+            }
+        return update
 
     return node
+
+
+def _route_after_role(state: CaseFile):
+    return "end" if state.status == "QUARANTINED" else "continue"
 
 
 def build_graph(
@@ -37,6 +50,7 @@ def build_graph(
     stores: dict[str, Any] | None = None,
 ):
     stores = stores or {}
+    guardrail = Guardrail(registry.guardrail)
     graph = StateGraph(CaseFile)
 
     for role_cfg in registry.roles:
@@ -49,14 +63,20 @@ def build_graph(
             llm=llm_factory(role_cfg.name) if llm_factory else None,
             stores=stores,
         )
-        graph.add_node(role_cfg.name, _make_role_node(role))
+        recipient = role_cfg.next[0] if role_cfg.next else "done"
+        graph.add_node(role_cfg.name, _make_role_node(role, guardrail, recipient))
 
     graph.add_node("done", _terminal)
 
     graph.add_edge(START, registry.roles[0].name)
     for role_cfg in registry.roles:
-        for nxt in role_cfg.next:
-            graph.add_edge(role_cfg.name, nxt)
+        recipient = role_cfg.next[0] if role_cfg.next else "done"
+        graph.add_conditional_edges(
+            role_cfg.name,
+            _route_after_role,
+            {"end": END, "continue": recipient},
+        )
+
     graph.add_edge("done", END)
 
     return graph.compile()

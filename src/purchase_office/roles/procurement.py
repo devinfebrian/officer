@@ -27,3 +27,7 @@ class Procurement(Role):
             "quote": quote_model,
             "verdicts": {**state.verdicts, self.name: verdict},
         }
+
+    def message_for(self, state: CaseFile, update: dict[str, Any]) -> str:
+        vendor = update.get("vendor")
+        return vendor.contract if vendor else ""

@@ -192,7 +192,7 @@ def test_first_reject_routes_to_rejected():
         from purchase_office.llm import FakeLLMClient
 
         if name == "legal":
-            return FakeLLMClient({"decision": "reject", "note": "contract fails"})
+            return FakeLLMClient({"decision": "reject", "note": "declined"})
         return FakeLLMClient({"decision": "approve", "note": "ok"})
 
     compiled = build_graph(reg, llm_factory=rejecting_llm, stores=_STORES)

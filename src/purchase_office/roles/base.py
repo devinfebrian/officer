@@ -46,3 +46,7 @@ class Role:
 
     def build_prompt(self, view: dict[str, Any], tool_results: dict[str, Any] | None = None) -> str:
         return f"Role {self.name} reviews: {view} tools: {tool_results or {}}"
+
+    def message_for(self, state: CaseFile, update: dict[str, Any]) -> str:
+        verdict = update.get("verdicts", {}).get(self.name)
+        return verdict.note if verdict else ""
