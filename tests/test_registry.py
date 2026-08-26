@@ -157,21 +157,44 @@ def test_build_graph_routes_roles_in_registry_order():
 
 # --- Seam 4: terminal routing ----------------------------------------------
 
+_STORES = {
+    "inventory": {"widget": {"stock": 3, "reorder_threshold": 5}},
+    "vendors": [
+        {
+            "name": "Acme Supply",
+            "item": "widget",
+            "quote": 120.0,
+            "contract": "Standard terms. Payment net 30.",
+        }
+    ],
+    "budget": {"limit": 200.0},
+    "sanctions": [],
+}
+
+
+def _llm_factory(name):
+    from purchase_office.llm import FakeLLMClient
+
+    return FakeLLMClient({"decision": "approve", "note": "ok"})
+
+
 def test_dry_run_reaches_filed():
     reg = load_registry(REGISTRY_PATH)
-    compiled = build_graph(reg)
+    compiled = build_graph(reg, llm_factory=_llm_factory, stores=_STORES)
     result = compiled.invoke(_initial_state())
     assert result["status"] == "FILED"
 
 
 def test_first_reject_routes_to_rejected():
     reg = load_registry(REGISTRY_PATH)
-    compiled = build_graph(reg)
-    result = compiled.invoke(
-        _initial_state(
-            verdicts={
-                "legal": Verdict(role="legal", decision="reject", note="contract fails"),
-            }
-        )
-    )
+
+    def rejecting_llm(name):
+        from purchase_office.llm import FakeLLMClient
+
+        if name == "legal":
+            return FakeLLMClient({"decision": "reject", "note": "contract fails"})
+        return FakeLLMClient({"decision": "approve", "note": "ok"})
+
+    compiled = build_graph(reg, llm_factory=rejecting_llm, stores=_STORES)
+    result = compiled.invoke(_initial_state())
     assert result["status"] == "REJECTED"

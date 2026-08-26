@@ -23,6 +23,18 @@ class WriteUp(BaseModel):
     source_role: str
 
 
+class Vendor(BaseModel):
+    name: str
+    item: str
+    quote: float
+    contract: str = ""
+
+
+class Quote(BaseModel):
+    vendor: str
+    amount: float
+
+
 class CaseFile(BaseModel):
     request_id: str
     request: PurchaseRequest
@@ -30,3 +42,5 @@ class CaseFile(BaseModel):
     route: list[str] = Field(default_factory=list)
     verdicts: dict[str, Verdict] = Field(default_factory=dict)
     writeups: list[WriteUp] = Field(default_factory=list)
+    vendor: Vendor | None = None
+    quote: Quote | None = None

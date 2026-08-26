@@ -19,7 +19,18 @@
       "Shell(python -c from langgraph.graph import StateGraph, START, END import inspect from langgraph.graph.state import CompiledStateGraph print([m for m in dir(CompiledStateGraph) if not m.startswith('_')]) 2 >& 1)",
       "Shell(python \"C:\\Users\\USER\\AppData\\Local\\Temp\\commandcode\\C--Users-USER-Portofolio-agent\\97b899b3-574d-4357-a166-ae6c0d7bfce5\\scratchpad\\probe2.py\" 2>&1)",
       "Shell(python \"C:\\Users\\USER\\AppData\\Local\\Temp\\commandcode\\C--Users-USER-Portofolio-agent\\97b899b3-574d-4357-a166-ae6c0d7bfce5\\scratchpad\\probe3.py\" 2>&1)",
-      "Shell(python -m pytest tests/test_registry.py -q 2 >& 1)"
+      "Shell(python -m pytest tests/test_registry.py -q 2 >& 1)",
+      "Shell(python -m pytest tests/test_llm.py -q 2 >& 1)",
+      "Shell(python -m pytest tests/test_tools.py -q 2 >& 1)",
+      "Shell(python -m pytest tests/test_projections.py -q 2 >& 1)",
+      "Shell(python -m pytest tests/test_verdict_isolation.py -q 2 >& 1)",
+      "Shell(python C:\\Users\\USER\\AppData\\Local\\Temp\\commandcode\\C--Users-USER-Portofolio-agent\\97b899b3-574d-4357-a166-ae6c0d7bfce5\\scratchpad\\probe_verdicts.py 2 >& 1)",
+      "Shell(python -m pytest tests/test_flow_happy.py -q 2 >& 1)",
+      "Shell(python -m pytest tests/test_verdict_isolation.py tests/test_projections.py -q 2 >& 1)",
+      "Shell(del:*)",
+      "Shell(python -m pytest tests/test_projections.py tests/test_flow_happy.py -q 2 >& 1)",
+      "Shell(python -m pytest tests/test_registry.py tests/test_llm.py tests/test_tools.py tests/test_verdict_isolation.py -q 2 >& 1)",
+      "Shell(python -m pytest -q 2 >& 1)"
     ],
     "deny": [],
     "defaultMode": "default"
