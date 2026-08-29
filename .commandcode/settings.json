@@ -36,7 +36,14 @@
       "Shell(python -m pytest tests/test_messages.py -q 2 >& 1)",
       "Shell(python -m pytest tests/test_flow_implant.py -q 2 >& 1)",
       "Shell(python C:\\Users\\USER\\AppData\\Local\\Temp\\commandcode\\C--Users-USER-Portofolio-agent\\97b899b3-574d-4357-a166-ae6c0d7bfce5\\scratchpad\\probe_writeups.py 2 >& 1)",
-      "Shell(python -m pytest tests/test_flow_implant.py tests/test_screens.py tests/test_messages.py -q 2 >& 1)"
+      "Shell(python -m pytest tests/test_flow_implant.py tests/test_screens.py tests/test_messages.py -q 2 >& 1)",
+      "Shell(python scratchpad/probe_checkpointer.py 2>&1)",
+      "Shell(python -m pytest tests/test_audit.py -q 2 >& 1)",
+      "Shell(python -m pytest tests/test_audit.py -q 2>&1)",
+      "Shell(python -m pytest tests/test_audit_flow.py -q 2>&1)",
+      "Shell(python -m pytest tests/test_audit_flow.py tests/test_audit.py -q 2>&1)",
+      "Shell(python -m pytest tests/test_persistence.py -q 2>&1)",
+      "Shell(python scratchpad/check_trail.py 2>&1)"
     ],
     "deny": [],
     "defaultMode": "default"

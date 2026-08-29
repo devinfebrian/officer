@@ -20,21 +20,62 @@ ROLE_CLASSES = {
 }
 
 
-def _terminal(state: CaseFile):
-    rejected = any(v.decision == "reject" for v in state.verdicts.values())
-    return {"status": "REJECTED" if rejected else "FILED"}
+def _make_terminal(audit):
+    def terminal(state: CaseFile):
+        rejected = any(v.decision == "reject" for v in state.verdicts.values())
+        status = "REJECTED" if rejected else "FILED"
+        if audit:
+            audit.append(
+                request_id=state.request_id, role="office", action="status", status=status
+            )
+        return {"status": status}
+
+    return terminal
 
 
-def _make_role_node(role, guardrail: Guardrail, recipient: str):
+def _make_role_node(role, guardrail: Guardrail, recipient: str, audit):
     def node(state: CaseFile):
+        if audit:
+            audit.append(request_id=state.request_id, role=role.name, action="enter", status="ok")
         update = role.run(state)
         message = role.message_for(state, update)
         ok, writeup = guardrail.check(role.name, recipient, message)
+        if audit:
+            audit.append(
+                request_id=state.request_id,
+                role="guardrail",
+                action="screen",
+                status="pass" if ok else "fail",
+                detail=writeup.screen if writeup else "",
+            )
         if not ok:
+            if audit:
+                audit.append(
+                    request_id=state.request_id,
+                    role="guardrail",
+                    action="writeup",
+                    status="open",
+                    detail=writeup.detail,
+                )
+                audit.append(
+                    request_id=state.request_id,
+                    role="office",
+                    action="status",
+                    status="QUARANTINED",
+                )
             return {
                 "status": "QUARANTINED",
                 "writeups": [*state.writeups, writeup],
             }
+        verdict = update.get("verdicts", {}).get(role.name)
+        if verdict and audit:
+            audit.append(
+                request_id=state.request_id,
+                role=role.name,
+                action="verdict",
+                status=verdict.decision,
+                detail=verdict.note,
+            )
         return update
 
     return node
@@ -48,6 +89,8 @@ def build_graph(
     registry: Registry,
     llm_factory: Callable[[str], LLMClient] | None = None,
     stores: dict[str, Any] | None = None,
+    audit=None,
+    checkpointer=None,
 ):
     stores = stores or {}
     guardrail = Guardrail(registry.guardrail)
@@ -64,9 +107,9 @@ def build_graph(
             stores=stores,
         )
         recipient = role_cfg.next[0] if role_cfg.next else "done"
-        graph.add_node(role_cfg.name, _make_role_node(role, guardrail, recipient))
+        graph.add_node(role_cfg.name, _make_role_node(role, guardrail, recipient, audit))
 
-    graph.add_node("done", _terminal)
+    graph.add_node("done", _make_terminal(audit))
 
     graph.add_edge(START, registry.roles[0].name)
     for role_cfg in registry.roles:
@@ -79,4 +122,6 @@ def build_graph(
 
     graph.add_edge("done", END)
 
+    if checkpointer is not None:
+        return graph.compile(checkpointer=checkpointer)
     return graph.compile()
