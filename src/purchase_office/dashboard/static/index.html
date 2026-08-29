@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Purchase Office — Records Room</title>
+<link rel="icon" href="data:,">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/style.css">
+</head>
+<body>
+<header class="bar">
+  <h1 class="brand">Purchase Office <span class="brand-sub">Records Room</span></h1>
+  <span id="connection" class="badge" data-state="connecting">CONNECTING</span>
+  <button id="run" class="run-btn" type="button">Run a case</button>
+</header>
+
+<main class="grid">
+  <section class="panel floor-panel" aria-label="Office floor">
+    <h2 class="panel-title">Office floor</h2>
+    <div id="floor" class="floor"></div>
+  </section>
+
+  <section class="panel file-panel" aria-label="Case file">
+    <h2 class="panel-title">Case file <span id="case-ref" class="case-ref"></span></h2>
+    <div id="folder" class="folder">
+      <p id="folder-empty" class="empty-note">The floor is quiet. Run a case.</p>
+      <div id="folder-body" class="folder-body" hidden>
+        <p id="request-line" class="request-line"></p>
+        <div id="slips" class="slips"></div>
+      </div>
+      <div id="stamp" class="stamp" hidden></div>
+    </div>
+  </section>
+</main>
+
+<section class="panel timeline-panel" aria-label="Timeline">
+  <div class="timeline-head">
+    <h2 class="panel-title">Timeline</h2>
+    <div class="timeline-controls">
+      <select id="case-picker" class="picker" aria-label="Case"></select>
+      <button id="live-btn" class="live-btn" type="button" aria-pressed="true">LIVE</button>
+    </div>
+  </div>
+  <input id="scrubber" class="scrubber" type="range" min="0" max="0" value="0" aria-label="Scrub timeline" disabled>
+  <ol id="ledger" class="ledger"></ol>
+</section>
+
+<script src="/app.js"></script>
+</body>
+</html>

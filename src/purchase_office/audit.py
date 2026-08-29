@@ -11,6 +11,7 @@ from pydantic import BaseModel
 
 
 class AuditEvent(BaseModel):
+    seq: int
     ts: str
     request_id: str
     role: str
@@ -19,25 +20,30 @@ class AuditEvent(BaseModel):
     detail: str
 
 
+SCHEMA = """
+CREATE TABLE IF NOT EXISTS events (
+    seq INTEGER PRIMARY KEY AUTOINCREMENT,
+    ts TEXT NOT NULL,
+    request_id TEXT NOT NULL,
+    role TEXT NOT NULL,
+    action TEXT NOT NULL,
+    status TEXT NOT NULL,
+    detail TEXT NOT NULL
+)
+"""
+
+
+def ensure_schema(conn: sqlite3.Connection) -> None:
+    conn.execute("PRAGMA journal_mode=WAL")
+    conn.execute(SCHEMA)
+    conn.commit()
+
+
 class AuditTrail:
     def __init__(self, path):
         self._conn = sqlite3.connect(path, check_same_thread=False)
         self._conn.row_factory = sqlite3.Row
-        self._conn.execute("PRAGMA journal_mode=WAL")
-        self._conn.execute(
-            """
-            CREATE TABLE IF NOT EXISTS events (
-                seq INTEGER PRIMARY KEY AUTOINCREMENT,
-                ts TEXT NOT NULL,
-                request_id TEXT NOT NULL,
-                role TEXT NOT NULL,
-                action TEXT NOT NULL,
-                status TEXT NOT NULL,
-                detail TEXT NOT NULL
-            )
-            """
-        )
-        self._conn.commit()
+        ensure_schema(self._conn)
 
     def append(self, request_id: str, role: str, action: str, status: str, detail: str = "") -> None:
         ts = datetime.now(timezone.utc).isoformat()
@@ -50,11 +56,11 @@ class AuditTrail:
     def read(self, request_id: str | None = None) -> list[AuditEvent]:
         if request_id is None:
             rows = self._conn.execute(
-                "SELECT ts, request_id, role, action, status, detail FROM events ORDER BY seq"
+                "SELECT seq, ts, request_id, role, action, status, detail FROM events ORDER BY seq"
             ).fetchall()
         else:
             rows = self._conn.execute(
-                "SELECT ts, request_id, role, action, status, detail FROM events WHERE request_id = ? ORDER BY seq",
+                "SELECT seq, ts, request_id, role, action, status, detail FROM events WHERE request_id = ? ORDER BY seq",
                 (request_id,),
             ).fetchall()
         return [AuditEvent(**row) for row in rows]

@@ -45,7 +45,12 @@ class Role:
         return {"verdicts": {**state.verdicts, self.name: verdict}}
 
     def build_prompt(self, view: dict[str, Any], tool_results: dict[str, Any] | None = None) -> str:
-        return f"Role {self.name} reviews: {view} tools: {tool_results or {}}"
+        return (
+            f"Role {self.name} reviews: {view} tools: {tool_results or {}}\n"
+            "Decide approve or reject based on the review above.\n"
+            'Reply with ONLY a JSON object: {"decision": "approve" or "reject", '
+            '"note": "<one sentence reason>"}'
+        )
 
     def message_for(self, state: CaseFile, update: dict[str, Any]) -> str:
         verdict = update.get("verdicts", {}).get(self.name)

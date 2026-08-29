@@ -16,6 +16,16 @@ def test_append_then_read_returns_events_in_order(tmp_path):
     ]
 
 
+def test_events_carry_a_monotonic_seq(tmp_path):
+    trail = AuditTrail(tmp_path / "audit.db")
+    trail.append(request_id="req-1", role="watcher", action="enter", status="ok", detail="")
+    trail.append(request_id="req-1", role="legal", action="enter", status="ok", detail="")
+
+    first, second = trail.read()
+
+    assert second.seq > first.seq > 0
+
+
 def test_every_event_is_timestamped_and_scoped_to_request(tmp_path):
     trail = AuditTrail(tmp_path / "audit.db")
     trail.append(request_id="req-1", role="watcher", action="enter", status="ok", detail="")

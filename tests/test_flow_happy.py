@@ -60,3 +60,22 @@ def test_happy_path_procurement_appends_vendor_and_quote():
     assert result["vendor"].name == "Acme Supply"
     assert result["quote"] is not None
     assert result["quote"].amount == 120.0
+
+
+def test_chatty_verdict_notes_still_file():
+    # A desk's own note is internal_notes: discussing the contract or the
+    # budget in an opinion must not trip the role-policy screen.
+    reg = load_registry(REGISTRY_PATH)
+    llm_factory = lambda name: FakeLLMClient(
+        {"decision": "approve", "note": "The contract terms and the budget limit look fine."}
+    )
+    compiled = build_graph(reg, llm_factory=llm_factory, stores=STORES)
+
+    result = compiled.invoke(
+        {
+            "request_id": "req-1",
+            "request": {"item": "widget", "quantity": 5, "reason": "stock low"},
+        }
+    )
+
+    assert result["status"] == "FILED"

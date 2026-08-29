@@ -68,6 +68,17 @@ def test_role_policy_ignores_uncategorizable_text():
     assert role_policy_screen("Have a nice day.", allowed) is None
 
 
+def test_role_policy_enforces_declared_categories():
+    assert role_policy_screen("whatever text", ["contract_terms"], {"budget_figures"}) == (
+        "budget_figures"
+    )
+
+
+def test_role_policy_passes_declared_internal_notes():
+    allowed = ["vendor_details", "budget_figures", "internal_notes"]
+    assert role_policy_screen("whatever text", allowed, {"internal_notes"}) is None
+
+
 # --- Guardrail.check ---------------------------------------------------------
 
 def _guardrail(screens=None, policy=None):
@@ -117,3 +128,27 @@ def test_check_fails_role_policy_for_restricted_recipient():
     )
     assert ok is False
     assert writeup.screen == "role_policy"
+
+
+def test_check_passes_verdict_note_mentioning_data_categories():
+    # A desk's own verdict note is internal_notes: mentioning the contract
+    # in an opinion is not transmitting contract data.
+    ok, writeup = _guardrail(
+        policy={"finance": ["vendor_details", "budget_figures", "internal_notes"]}
+    ).check(
+        "legal",
+        "finance",
+        "The contract terms look standard and the clauses are present.",
+        categories={"internal_notes"},
+    )
+    assert ok is True
+    assert writeup is None
+
+
+def test_check_still_enforces_declared_categories_not_allowed():
+    ok, writeup = _guardrail(policy={"finance": ["internal_notes"]}).check(
+        "legal", "finance", "note", categories={"contract_terms"}
+    )
+    assert ok is False
+    assert writeup.screen == "role_policy"
+    assert writeup.detail == "contract_terms"

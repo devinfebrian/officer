@@ -39,8 +39,15 @@ def pii_screen(text: str):
     return None
 
 
-def role_policy_screen(text: str, allowed):
+def role_policy_screen(text: str, allowed, categories=None):
     if allowed is None:
+        return None
+    if categories is not None:
+        # The sender declared what it is sending (a verdict note is
+        # internal_notes); enforce the declaration instead of guessing.
+        for category in categories:
+            if category not in allowed:
+                return category
         return None
     lowered = text.lower()
     for category, keywords in _CATEGORY_KEYWORDS.items():

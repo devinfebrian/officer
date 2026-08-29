@@ -36,10 +36,25 @@ def _make_terminal(audit):
 def _make_role_node(role, guardrail: Guardrail, recipient: str, audit):
     def node(state: CaseFile):
         if audit:
-            audit.append(request_id=state.request_id, role=role.name, action="enter", status="ok")
+            detail = ""
+            if role.name == "watcher" and state.request is not None:
+                detail = (
+                    f"{state.request.quantity} × {state.request.item} — {state.request.reason}"
+                )
+            audit.append(
+                request_id=state.request_id,
+                role=role.name,
+                action="enter",
+                status="ok",
+                detail=detail,
+            )
         update = role.run(state)
         message = role.message_for(state, update)
-        ok, writeup = guardrail.check(role.name, recipient, message)
+        # A desk's own verdict note is internal_notes; only data-bearing
+        # updates (a vendor contract, a quote) are content-scanned.
+        verdict_only = "verdicts" in update and not ({"vendor", "quote"} & set(update))
+        categories = {"internal_notes"} if verdict_only else None
+        ok, writeup = guardrail.check(role.name, recipient, message, categories)
         if audit:
             audit.append(
                 request_id=state.request_id,
